@@ -56,7 +56,7 @@ export default function LoginPage() {
 
                     <div className="mt-8 text-center">
                         <p className="text-xs text-zinc-600">
-                            Authorized Personnel Only
+                            Authorized Personnel Only (v1.0)
                         </p>
                     </div>
                 </div>
