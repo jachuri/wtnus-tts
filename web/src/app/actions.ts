@@ -7,7 +7,7 @@ export async function login(prevState: any, formData: FormData) {
   const password = formData.get('password')
   const sitePassword = process.env.SITE_PASSWORD
 
-  if (password === sitePassword) {
+  if (password === sitePassword?.trim()) {
     // 24시간 동안 유효한 인증 쿠키 설정
     const cookieStore = await cookies()
     cookieStore.set('auth', 'true', {
