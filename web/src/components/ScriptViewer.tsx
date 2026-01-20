@@ -6,7 +6,7 @@ import { useRef, useState, useEffect } from 'react'
 import JSZip from 'jszip'
 
 export function ScriptViewer() {
-    const { lines, voiceMapping, setGenerating, addAudioVersion, selectAudioVersion, setError } = useScriptStore()
+    const { lines, voiceMapping, scriptName, setGenerating, addAudioVersion, selectAudioVersion, setError } = useScriptStore()
     const [globalGenerating, setGlobalGenerating] = useState(false)
     const [playingIndex, setPlayingIndex] = useState<number>(-1)
 
@@ -140,7 +140,18 @@ export function ScriptViewer() {
         const url = URL.createObjectURL(content)
         const a = document.createElement("a")
         a.href = url
-        a.download = "TTS_Export.zip"
+
+        // 파일명 생성: {스크립트이름}_{날짜시간}.zip
+        const now = new Date()
+        const timestamp = now.getFullYear().toString() +
+            (now.getMonth() + 1).toString().padStart(2, '0') +
+            now.getDate().toString().padStart(2, '0') + '_' +
+            now.getHours().toString().padStart(2, '0') +
+            now.getMinutes().toString().padStart(2, '0') +
+            now.getSeconds().toString().padStart(2, '0')
+        const baseName = scriptName || 'TTS_Export'
+        a.download = `${baseName}_${timestamp}.zip`
+
         a.click()
         URL.revokeObjectURL(url)
     }
@@ -157,8 +168,8 @@ export function ScriptViewer() {
                         onClick={handlePlayView}
                         disabled={lines.filter(l => l.audioVersions.length > 0).length === 0}
                         className={`flex items-center gap-2 font-bold px-6 py-2.5 rounded-lg transition-all shadow-lg active:scale-[0.98] ${playingIndex !== -1
-                                ? 'bg-red-500 hover:bg-red-600 text-white'
-                                : 'bg-zinc-800 text-white hover:bg-zinc-700'
+                            ? 'bg-red-500 hover:bg-red-600 text-white'
+                            : 'bg-zinc-800 text-white hover:bg-zinc-700'
                             }`}
                     >
                         {playingIndex !== -1 ? <StopCircle size={18} /> : <PlayCircle size={18} />}

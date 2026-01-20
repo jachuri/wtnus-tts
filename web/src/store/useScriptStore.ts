@@ -26,9 +26,11 @@ interface ScriptStore {
     characters: string[] // Unique list of characters
     voiceMapping: Record<string, string> // Character Name -> Voice ID
     availableVoices: Voice[]
+    scriptName: string // 스크립트 파일명 (확장자 제외)
 
     // Actions
     setLines: (lines: ScriptLine[]) => void
+    setScriptName: (name: string) => void
     setAvailableVoices: (voices: Voice[]) => void
     setVoiceMapping: (character: string, voiceId: string) => void
     addAudioVersion: (lineId: string, audioUrl: string) => void
@@ -43,6 +45,7 @@ export const useScriptStore = create<ScriptStore>((set) => ({
     characters: [],
     voiceMapping: {},
     availableVoices: [],
+    scriptName: '',
 
     setLines: (scriptLines) => {
         const uniqueChars = Array.from(new Set(scriptLines.map(l => l.character)))
@@ -57,6 +60,8 @@ export const useScriptStore = create<ScriptStore>((set) => ({
             characters: uniqueChars
         })
     },
+
+    setScriptName: (name) => set({ scriptName: name }),
 
     setAvailableVoices: (voices) => set({ availableVoices: voices }),
 
@@ -114,5 +119,5 @@ export const useScriptStore = create<ScriptStore>((set) => ({
             )
         })),
 
-    clearScript: () => set({ lines: [], characters: [], voiceMapping: {} })
+    clearScript: () => set({ lines: [], characters: [], voiceMapping: {}, scriptName: '' })
 }))

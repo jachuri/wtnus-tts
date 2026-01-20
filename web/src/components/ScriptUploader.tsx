@@ -2,6 +2,7 @@
 
 import { useState } from 'react'
 import { Upload, FileText } from 'lucide-react'
+import { useScriptStore } from '@/store/useScriptStore'
 
 interface Props {
     onLoaded: (content: string) => void
@@ -9,10 +10,15 @@ interface Props {
 
 export function ScriptUploader({ onLoaded }: Props) {
     const [text, setText] = useState('')
+    const { setScriptName } = useScriptStore()
 
     const handleFileUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
         const file = e.target.files?.[0]
         if (!file) return
+
+        // 파일명에서 확장자 제거하여 저장
+        const nameWithoutExt = file.name.replace(/\.[^/.]+$/, '')
+        setScriptName(nameWithoutExt)
 
         const reader = new FileReader()
         reader.onload = (e) => {
