@@ -12,6 +12,7 @@ export interface LineState extends ScriptLine {
     audioVersions: AudioVersion[]
     isGenerating: boolean
     error?: string
+    duration?: number // 오디오 길이 (초)
 }
 
 export interface Voice {
@@ -38,6 +39,10 @@ interface ScriptStore {
     setGenerating: (lineId: string, isGenerating: boolean) => void
     setError: (lineId: string, error: string) => void
     clearScript: () => void
+    // 편집 및 duration 관련 액션
+    updateLineText: (lineId: string, text: string) => void
+    updateLineEmotion: (lineId: string, emotion: string) => void
+    setLineDuration: (lineId: string, duration: number) => void
 }
 
 export const useScriptStore = create<ScriptStore>((set) => ({
@@ -119,5 +124,26 @@ export const useScriptStore = create<ScriptStore>((set) => ({
             )
         })),
 
-    clearScript: () => set({ lines: [], characters: [], voiceMapping: {}, scriptName: '' })
+    clearScript: () => set({ lines: [], characters: [], voiceMapping: {}, scriptName: '' }),
+
+    updateLineText: (lineId, text) =>
+        set((state) => ({
+            lines: state.lines.map(line =>
+                line.id === lineId ? { ...line, text } : line
+            )
+        })),
+
+    updateLineEmotion: (lineId, emotion) =>
+        set((state) => ({
+            lines: state.lines.map(line =>
+                line.id === lineId ? { ...line, emotion } : line
+            )
+        })),
+
+    setLineDuration: (lineId, duration) =>
+        set((state) => ({
+            lines: state.lines.map(line =>
+                line.id === lineId ? { ...line, duration } : line
+            )
+        }))
 }))
