@@ -58,9 +58,8 @@ export function ScriptViewer() {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({
-                    text: line.text,
+                    text: line.emotion !== 'Neutral' ? `[${line.emotion}] ${line.text}` : line.text,
                     voiceId: voiceId,
-                    // We can add emotion prompting logic here later if using V3
                 })
             })
 

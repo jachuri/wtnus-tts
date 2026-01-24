@@ -23,7 +23,7 @@ export async function POST(request: Request) {
         // 'eleven_multilingual_v2' is detailed in the docs I saw.
         const audioStream = await client.textToSpeech.convert(voiceId, {
             text: text,
-            modelId: "eleven_multilingual_v2",
+            modelId: "eleven_multilingual_v3",
             outputFormat: "mp3_44100_128",
         })
 
