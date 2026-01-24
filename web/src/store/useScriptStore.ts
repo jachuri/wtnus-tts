@@ -24,6 +24,7 @@ export interface Voice {
 interface ScriptStore {
     // Data
     lines: LineState[]
+    originalLines: ScriptLine[] // 원본 라인 보존용
     characters: string[] // Unique list of characters
     voiceMapping: Record<string, string> // Character Name -> Voice ID
     availableVoices: Voice[]
@@ -31,6 +32,7 @@ interface ScriptStore {
 
     // Actions
     setLines: (lines: ScriptLine[]) => void
+    setOriginalLines: (lines: ScriptLine[]) => void
     setScriptName: (name: string) => void
     setAvailableVoices: (voices: Voice[]) => void
     setVoiceMapping: (character: string, voiceId: string) => void
@@ -47,6 +49,7 @@ interface ScriptStore {
 
 export const useScriptStore = create<ScriptStore>((set) => ({
     lines: [],
+    originalLines: [],
     characters: [],
     voiceMapping: {},
     availableVoices: [],
@@ -65,6 +68,8 @@ export const useScriptStore = create<ScriptStore>((set) => ({
             characters: uniqueChars
         })
     },
+
+    setOriginalLines: (lines) => set({ originalLines: lines }),
 
     setScriptName: (name) => set({ scriptName: name }),
 

@@ -58,3 +58,66 @@ export function parseScript(markdown: string): ScriptLine[] {
 
     return scriptData
 }
+
+export function bundleScriptLines(lines: ScriptLine[]): ScriptLine[] {
+    if (lines.length === 0) return []
+
+    // 1. Group lines by character
+    const characterGroups: Record<string, ScriptLine[]> = {}
+    const characterOrder: string[] = [] // To preserve order of appearance (roughly) or mapped order
+
+    lines.forEach(line => {
+        if (!characterGroups[line.character]) {
+            characterGroups[line.character] = []
+            characterOrder.push(line.character)
+        }
+        characterGroups[line.character].push(line)
+    })
+
+    // 2. Merge lines for each character
+    const bundledResult: ScriptLine[] = []
+
+    characterOrder.forEach((char, index) => {
+        const charLines = characterGroups[char]
+        if (charLines.length === 0) return
+
+        // Base line info from the first occurrence
+        const firstLine = charLines[0]
+
+        // Accumulate text
+        let mergedText = firstLine.text
+        if (firstLine.emotion !== 'Neutral') {
+            mergedText = `[${firstLine.emotion}] ${firstLine.text}`
+        }
+
+        let mergedOriginalText = firstLine.originalText
+        let currentEmotion = firstLine.emotion
+
+        // Start from second line
+        for (let i = 1; i < charLines.length; i++) {
+            const nextLine = charLines[i]
+
+            let nextTextToAdd = nextLine.text
+
+            // Insert emotion tag if changed
+            if (nextLine.emotion !== currentEmotion && nextLine.emotion !== 'Neutral') {
+                nextTextToAdd = `[${nextLine.emotion}] ${nextLine.text}`
+                currentEmotion = nextLine.emotion
+            }
+
+            // Separator
+            mergedText = `${mergedText} ... ${nextTextToAdd}`
+            mergedOriginalText = `${mergedOriginalText}\n${nextLine.originalText}`
+        }
+
+        bundledResult.push({
+            id: `bundle-${char}-${Date.now()}`,
+            character: char,
+            emotion: 'Mixed', // Since it contains multiple emotions
+            text: mergedText,
+            originalText: mergedOriginalText
+        })
+    })
+
+    return bundledResult
+}

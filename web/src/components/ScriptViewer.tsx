@@ -1,7 +1,8 @@
 'use client'
 
+import { ScriptLine, bundleScriptLines } from '@/lib/parser'
 import { useScriptStore, LineState } from '@/store/useScriptStore'
-import { Play, RotateCcw, Download, Sparkles, Loader2, AlertCircle, PlayCircle, StopCircle, Pencil, Check, X } from 'lucide-react'
+import { Play, RotateCcw, Download, Sparkles, Loader2, AlertCircle, PlayCircle, StopCircle, Pencil, Check, X, Layers } from 'lucide-react'
 import { useRef, useState, useEffect } from 'react'
 import JSZip from 'jszip'
 
@@ -13,7 +14,7 @@ function formatDuration(seconds: number): string {
 }
 
 export function ScriptViewer() {
-    const { lines, voiceMapping, scriptName, setGenerating, addAudioVersion, selectAudioVersion, setError, updateLineText, updateLineEmotion, setLineDuration } = useScriptStore()
+    const { lines, setLines, voiceMapping, scriptName, setGenerating, addAudioVersion, selectAudioVersion, setError, updateLineText, updateLineEmotion, setLineDuration } = useScriptStore()
     const [globalGenerating, setGlobalGenerating] = useState(false)
     const [playingIndex, setPlayingIndex] = useState<number>(-1)
 

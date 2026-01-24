@@ -2,15 +2,15 @@
 
 import { useState, useEffect } from 'react'
 import { logout } from './actions'
-import { parseScript } from '@/lib/parser'
+import { parseScript, bundleScriptLines } from '@/lib/parser'
 import { useScriptStore } from '@/store/useScriptStore'
 import { ScriptUploader } from '@/components/ScriptUploader'
 import { VoiceMapper } from '@/components/VoiceMapper'
 import { ScriptViewer } from '@/components/ScriptViewer'
 
 export default function Home() {
-  const { lines, setLines, setAvailableVoices } = useScriptStore()
-  const [tab, setTab] = useState<'upload' | 'mapping' | 'generate'>('upload')
+  const { lines, originalLines, setLines, setOriginalLines, setAvailableVoices } = useScriptStore()
+  const [tab, setTab] = useState<'upload' | 'mapping' | 'generate' | 'bundle'>('upload')
 
   // Load voices on mount
   useEffect(() => {
@@ -22,12 +22,49 @@ export default function Home() {
       .catch(err => console.error(err))
   }, [setAvailableVoices])
 
-  const handleScriptLoad = (content: string) => {
+  const handleScriptLoad = (content: string, options: { bundle: boolean }) => {
     const parsed = parseScript(content)
-    setLines(parsed)
+
+    // Always store original
+    setOriginalLines(parsed)
+
+    // Option from uploader (currently false)
+    if (options.bundle) {
+      const bundled = bundleScriptLines(parsed)
+      setLines(bundled)
+    } else {
+      setLines(parsed)
+    }
+
     if (parsed.length > 0) {
       setTab('mapping')
     }
+  }
+
+  const handleTabChange = (newTab: typeof tab) => {
+    // Logic for switching modes
+    let sourceLines = originalLines
+
+    // Fallback: If originalLines is empty but we have lines (e.g. from before code update or first load),
+    // treat current lines as original (assuming we are in 'generate' mode which is default)
+    if (sourceLines.length === 0 && lines.length > 0) {
+      sourceLines = lines
+      setOriginalLines(lines)
+    }
+
+    if (newTab === 'generate') {
+      // Restore original
+      if (sourceLines.length > 0) {
+        setLines(sourceLines)
+      }
+    } else if (newTab === 'bundle') {
+      // Apply bundle
+      if (sourceLines.length > 0) {
+        const bundled = bundleScriptLines(sourceLines)
+        setLines(bundled)
+      }
+    }
+    setTab(newTab)
   }
 
   return (
@@ -52,16 +89,16 @@ export default function Home() {
         {/* Steps Navigation */}
         {lines.length > 0 && (
           <nav className="flex gap-4 mb-8">
-            {['upload', 'mapping', 'generate'].map((step) => (
+            {['upload', 'mapping', 'generate', 'bundle'].map((step) => (
               <button
                 key={step}
-                onClick={() => setTab(step as any)}
+                onClick={() => handleTabChange(step as any)}
                 className={`px-4 py-2 rounded-full text-sm font-medium transition-all ${tab === step
-                    ? 'bg-white text-black shadow-lg shadow-white/10'
-                    : 'bg-zinc-900 text-zinc-500 hover:text-zinc-300'
+                  ? 'bg-white text-black shadow-lg shadow-white/10'
+                  : 'bg-zinc-900 text-zinc-500 hover:text-zinc-300'
                   }`}
               >
-                {step.charAt(0).toUpperCase() + step.slice(1)}
+                {step === 'bundle' ? 'Generate (Bundle)' : step.charAt(0).toUpperCase() + step.slice(1)}
               </button>
             ))}
           </nav>
@@ -80,7 +117,7 @@ export default function Home() {
             </div>
           )}
 
-          {tab === 'generate' && (
+          {(tab === 'generate' || tab === 'bundle') && (
             <div className="w-full">
               <ScriptViewer />
             </div>
